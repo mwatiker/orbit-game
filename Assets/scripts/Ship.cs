@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Ship : MonoBehaviour
 {
-    public GameObject[] planets; // Array to hold all planets
     public float G = 6.674f; // Adjusted gravitational constant for the game
     public float thrust = 5f; // Thrust power of the spaceship
     public float rotationSpeed = 100f; // Speed at which the spaceship rotates
@@ -27,6 +26,18 @@ public class Ship : MonoBehaviour
 
     public GameObject map;
 
+    public GameObject map2;
+
+    private GameObject currentMap;
+
+    private PlanetMaster planetMaster;
+
+    private Planet[] planetInfo;
+
+    private bool applyingThrust = false;
+
+    private ArrowGenerator arrowGenerator;
+
 
     void Start()
     {
@@ -35,25 +46,58 @@ public class Ship : MonoBehaviour
         landingEffect.SetActive(false);
         blueThrust.SetActive(false);
         map.SetActive(false);
+        planetMaster = GameObject.FindObjectOfType<PlanetMaster>();
+        planetInfo = planetMaster.getPlanetInfo();
+        arrowGenerator = FindObjectOfType<ArrowGenerator>(); 
     }
-
     void Update()
     {
         HandleJetEffect();
         CheckForMap();
+        // if on a planet and not thrusting, lock the ship in place
+        
     }
 
     void FixedUpdate()
     {
-        ApplyGravity();
+        if (!onPlanet || applyingThrust)
+        {
+            ApplyGravity();
+        }
+        else
+        {
+            rb.velocity = Vector2.zero;
+            rb.angularVelocity = 0;
+        }
         ControlShip();
+
+        if (rb.velocity != Vector2.zero)
+        {
+            arrowGenerator.SetDirection(rb.velocity);
+        }
     }
 
-    void CheckForMap()
+    private void CheckForMap()
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            map.SetActive(!map.activeInHierarchy);
+            if (currentMap == map)
+            {
+                map.SetActive(false);
+                map2.SetActive(true);
+                currentMap = map2;
+            }
+            else if (currentMap == map2)
+            {
+                map2.SetActive(false);
+                map.SetActive(false);
+                currentMap = null;
+            }
+            else
+            {
+                map.SetActive(true);
+                currentMap = map;
+            }
         }
     }
 
@@ -87,19 +131,22 @@ public class Ship : MonoBehaviour
 
     void ApplyGravity()
     {
-        foreach (GameObject planet in planets)
+
+        foreach (Planet planet in planetInfo)
         {
-            Rigidbody2D planetRb = planet.GetComponent<Rigidbody2D>();
+            GameObject planetGO = planet.GetObject();
+            Rigidbody2D planetRb = planetGO.GetComponent<Rigidbody2D>();
 
             if (planetRb != null && rb != null)
             {
-                Vector2 force = GravitationalForce(planetRb, rb);
+                planetMass = planet.GetMass();
+                Vector2 force = GravitationalForce(planetRb, rb, planetMass);
                 rb.AddForce(force);
             }
         }
     }
 
-    Vector2 GravitationalForce(Rigidbody2D planetRb, Rigidbody2D shipRb)
+    Vector2 GravitationalForce(Rigidbody2D planetRb, Rigidbody2D shipRb, float planetMass)
     {
         Vector2 distanceVector = planetRb.position - shipRb.position;
         float distance = distanceVector.magnitude;
@@ -145,16 +192,19 @@ public class Ship : MonoBehaviour
         {
             blueThrust.SetActive(true); // Show blue thrust effect when blue thrusting
             jetEffect.SetActive(true); // Show jet effect when blue thrusting
+            applyingThrust = true;
         }
         else if (thrustInput > 0)
         {
             jetEffect.SetActive(true); // Show jet effect when regular thrusting
             blueThrust.SetActive(false); // Hide blue thrust effect when regular thrusting
+            applyingThrust = true;
         }
         else
         {
             blueThrust.SetActive(false); 
             jetEffect.SetActive(false); // Hide jet effect when not thrusting
+            applyingThrust = false;
         }
     }
 }
