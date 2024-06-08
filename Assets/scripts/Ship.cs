@@ -21,23 +21,40 @@ public class Ship : MonoBehaviour
 
     public GameObject landingEffect;
 
+    public GameObject blueThrust;
+
+    public bool blueThruster = false;
+
+    public GameObject map;
+
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         jetEffect.SetActive(false);
         landingEffect.SetActive(false);
+        blueThrust.SetActive(false);
+        map.SetActive(false);
     }
 
     void Update()
     {
         HandleJetEffect();
+        CheckForMap();
     }
 
     void FixedUpdate()
     {
         ApplyGravity();
         ControlShip();
+    }
+
+    void CheckForMap()
+    {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            map.SetActive(!map.activeInHierarchy);
+        }
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -110,6 +127,11 @@ public class Ship : MonoBehaviour
             if (Input.GetKey(KeyCode.Space))
             {
                 currentThrust += boostBonus; // Apply boost if space is pressed
+                blueThruster = true;
+            }
+            else
+            {
+                blueThruster = false;
             }
             rb.AddForce(thrustDirection * currentThrust * thrustInput);
         }
@@ -119,12 +141,19 @@ public class Ship : MonoBehaviour
     {
         float thrustInput = Input.GetAxis("Vertical");
 
-        if (thrustInput > 0)
+        if (thrustInput > 0 && blueThruster)
         {
-            jetEffect.SetActive(true); // Show jet effect when thrusting
+            blueThrust.SetActive(true); // Show blue thrust effect when blue thrusting
+            jetEffect.SetActive(true); // Show jet effect when blue thrusting
+        }
+        else if (thrustInput > 0)
+        {
+            jetEffect.SetActive(true); // Show jet effect when regular thrusting
+            blueThrust.SetActive(false); // Hide blue thrust effect when regular thrusting
         }
         else
         {
+            blueThrust.SetActive(false); 
             jetEffect.SetActive(false); // Hide jet effect when not thrusting
         }
     }
