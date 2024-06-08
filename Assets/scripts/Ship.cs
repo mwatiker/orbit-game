@@ -42,19 +42,24 @@ public class Ship : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        // collision with a planet
         if (collision.gameObject.CompareTag("Planet"))
         {
             StartCoroutine(SetParentAfterFrame(collision.transform));
             landingEffect.SetActive(true);
+            onPlanet = true;
         }
     }
 
     void OnCollisionExit2D(Collision2D collision)
     {
+        // leaving a planet
         if (collision.gameObject.CompareTag("Planet") && gameObject.activeInHierarchy)
         {
             StartCoroutine(SetParentAfterFrame(null));
+            onPlanet = false;
         }
+        
     }
 
     IEnumerator SetParentAfterFrame(Transform newParent)
