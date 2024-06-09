@@ -10,8 +10,6 @@ public class Ship : MonoBehaviour
 
     private Rigidbody2D rb;
 
-    public float planetMass = 10f;
-
     public float boostBonus = 20f;
 
     public GameObject jetEffect;
@@ -47,6 +45,10 @@ public class Ship : MonoBehaviour
 
     public CinemachineCameraZoom mapCameraZoom;
 
+    private float planetMass;
+
+    public float orbitRadius = 50f;
+
 
     void Start()
     {
@@ -66,6 +68,12 @@ public class Ship : MonoBehaviour
         HandleJetEffect();
         CheckForMapInput();
         // if on a planet and not thrusting, lock the ship in place
+
+        if (Input.GetKeyDown(KeyCode.R)) // Assuming 'O' is the key to orbit
+        {
+            GameObject planetGO = planetInfo[0].GetObject();
+            SetOrbitAndTeleport(planetGO, orbitRadius); // Example: Orbit at a radius of 50 units
+        }
 
     }
 
@@ -88,6 +96,24 @@ public class Ship : MonoBehaviour
 
     }
 
+    void SetOrbitAndTeleport(GameObject planetGO, float desiredOrbitRadius)
+    {
+        Rigidbody2D planetRb = planetGO.GetComponent<Rigidbody2D>();
+        // Calculate the position for the ship along the desired orbit radius
+        Vector2 orbitPosition = new Vector2(desiredOrbitRadius, 0); // Choose an initial position, e.g., (radius, 0)
+        orbitPosition = Quaternion.Euler(0, 0, Random.Range(0, 360)) * orbitPosition; // Rotate to a random angle around the planet
+        orbitPosition += planetRb.position; // Adjust position relative to the planet's position
+
+        // Calculate the orbital speed and direction
+        float orbitSpeed = Mathf.Sqrt(G * planetInfo[0].GetMass() / desiredOrbitRadius);
+        Vector2 orbitDirection = new Vector2(-orbitPosition.y, orbitPosition.x).normalized; // Perpendicular to the radius vector
+
+        // Teleport the ship to the calculated position
+        rb.position = orbitPosition;
+        rb.velocity = orbitDirection * orbitSpeed; // Set velocity tangent to the orbit
+    }
+
+
     // private void UpdateFlightPath()
     // {
     //     Vector2 simulatedPosition = rb.position; // start at the current position
@@ -108,7 +134,7 @@ public class Ship : MonoBehaviour
     //             Rigidbody2D planetRb = planetGO.GetComponent<Rigidbody2D>();
     //             force += GravitationalForceProjection(planetRb, simulatedPosition, mass, planet.GetMass());
     //         }
-            
+
     //         // Only gravity affects the velocity if no thrust is applied
     //         simulatedVelocity += force * Time.fixedDeltaTime;
     //         simulatedPosition += simulatedVelocity * Time.fixedDeltaTime;
@@ -212,9 +238,9 @@ public class Ship : MonoBehaviour
         transform.parent = newParent;
     }
 
-    
 
-    
+
+
 
     private void ApplyGravity()
     {

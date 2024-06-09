@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 569dedd4f957c8249a91d162404f5b28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bluePlanetMass: 30.05
+  bluePlanetMass: 1052.7
   redPlanetMass: 25
   whitePlanetMass: 25
   planets:
@@ -1752,7 +1752,6 @@ MonoBehaviour:
   G: 1
   thrust: 50
   rotationSpeed: 300
-  planetMass: 5
   boostBonus: 80
   jetEffect: {fileID: 1095570544}
   landingEffect: {fileID: 323711713}
