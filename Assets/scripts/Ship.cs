@@ -42,6 +42,10 @@ public class Ship : MonoBehaviour
 
     public GameObject navMapVisual;
 
+    public LineRenderer pathRenderer;
+    public int pathLength = 100; // Number of points in the path
+    public float pathPointInterval = 0.1f; // Time interval between points
+
 
     void Start()
     {
@@ -53,14 +57,17 @@ public class Ship : MonoBehaviour
         planetMaster = GameObject.FindObjectOfType<PlanetMaster>();
         planetInfo = planetMaster.getPlanetInfo();
         navMapVisual.SetActive(false);
-        
+        currentMap = null;
+        pathRenderer.positionCount = pathLength;
+        pathRenderer.enabled = true;
+
     }
     void Update()
     {
         HandleJetEffect();
         CheckForMapInput();
         // if on a planet and not thrusting, lock the ship in place
-        
+
     }
 
     void FixedUpdate()
@@ -76,10 +83,64 @@ public class Ship : MonoBehaviour
         }
         ControlShip();
         HandleMapNavigation();
+        UpdateFlightPath();
 
-            
+
 
     }
+
+    private void UpdateFlightPath()
+    {
+        Vector2 simulatedPosition = rb.position; // start at the current position
+        Vector2 simulatedVelocity = rb.velocity; // start with the current velocity
+        float mass = rb.mass; // using the spaceship's actual mass
+
+        for (int i = 0; i < pathLength; i++)
+        {
+            // Simulate rotation and thrust
+            float rotation = transform.eulerAngles.z; // Adjust this if your ship can rotate during flight
+            Vector2 thrustDirection = transform.up * -1;
+            Vector2 force = Vector2.zero; // Start with no external force
+
+            // Apply gravity from all planets
+            foreach (Planet planet in planetMaster.getPlanetInfo())
+            {
+                GameObject planetGO = planet.GetObject();
+                Rigidbody2D planetRb = planetGO.GetComponent<Rigidbody2D>();
+                force += GravitationalForceProjection(planetRb, simulatedPosition, mass, planet.GetMass());
+            }
+
+            // Assume constant thrust or modify based on your control system
+            Vector2 thrustForce = thrustDirection * thrust; // compute thrust force separately
+            simulatedVelocity += (thrustForce + force) * Time.fixedDeltaTime;
+            simulatedPosition += simulatedVelocity * Time.fixedDeltaTime;
+
+            pathRenderer.SetPosition(i, simulatedPosition);
+        }
+    }
+
+    private Vector2 GravitationalForceProjection(Rigidbody2D planetRb, Vector2 shipPosition, float shipMass, float planetMass)
+    {
+        Vector2 distanceVector = planetRb.position - shipPosition;
+        float distance = distanceVector.magnitude;
+        if (distance < 1f) distance = 1f; // Prevent division by zero or extremely high forces
+        float forceMagnitude = (G * planetMass * shipMass) / (distance * distance);
+        Vector2 force = distanceVector.normalized * forceMagnitude;
+        return force;
+    }
+
+    private Vector2 GravitationalForce(Rigidbody2D planetRb, Rigidbody2D shipRb, float planetMass)
+    {
+        Vector2 distanceVector = planetRb.position - shipRb.position;
+        float distance = distanceVector.magnitude;
+        float forceMagnitude = (G * planetMass * shipRb.mass) / (distance * distance);
+        Vector2 force = distanceVector.normalized * forceMagnitude;
+        return force;
+    }
+
+
+
+
 
     private void HandleMapNavigation()
     {
@@ -96,8 +157,8 @@ public class Ship : MonoBehaviour
                 velocityNavArrow.gameObject.SetActive(false);
             }
 
-            
-            float angle = transform.eulerAngles.z - 90 ; // Get the z-axis rotation of the ship
+
+            float angle = transform.eulerAngles.z - 90; // Get the z-axis rotation of the ship
             rotationalNavArrow.SetDirectionRotation(angle);
         }
         else
@@ -130,7 +191,7 @@ public class Ship : MonoBehaviour
         }
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
         // collision with a planet
         if (collision.gameObject.CompareTag("Planet"))
@@ -141,7 +202,7 @@ public class Ship : MonoBehaviour
         }
     }
 
-    void OnCollisionExit2D(Collision2D collision)
+    private void OnCollisionExit2D(Collision2D collision)
     {
         // leaving a planet
         if (collision.gameObject.CompareTag("Planet") && gameObject.activeInHierarchy)
@@ -149,7 +210,7 @@ public class Ship : MonoBehaviour
             StartCoroutine(SetParentAfterFrame(null));
             onPlanet = false;
         }
-        
+
     }
 
     IEnumerator SetParentAfterFrame(Transform newParent)
@@ -158,7 +219,7 @@ public class Ship : MonoBehaviour
         transform.parent = newParent;
     }
 
-    void ApplyGravity()
+    private void ApplyGravity()
     {
 
         foreach (Planet planet in planetInfo)
@@ -175,14 +236,7 @@ public class Ship : MonoBehaviour
         }
     }
 
-    Vector2 GravitationalForce(Rigidbody2D planetRb, Rigidbody2D shipRb, float planetMass)
-    {
-        Vector2 distanceVector = planetRb.position - shipRb.position;
-        float distance = distanceVector.magnitude;
-        float forceMagnitude = (G * planetMass * shipRb.mass) / (distance * distance);
-        Vector2 force = distanceVector.normalized * forceMagnitude;
-        return force;
-    }
+    
 
     void ControlShip()
     {
@@ -190,10 +244,11 @@ public class Ship : MonoBehaviour
         float thrustInput = Input.GetAxis("Vertical");
 
         // Rotate the ship based on horizontal input, if not on a planet
-        if (!onPlanet){
+        if (!onPlanet)
+        {
             rb.angularVelocity = -rotationInput * rotationSpeed;
         }
-        
+
 
         // Apply thrust forward based on vertical input (up key)
         if (thrustInput > 0)
@@ -231,7 +286,7 @@ public class Ship : MonoBehaviour
         }
         else
         {
-            blueThrust.SetActive(false); 
+            blueThrust.SetActive(false);
             jetEffect.SetActive(false); // Hide jet effect when not thrusting
             applyingThrust = false;
         }
