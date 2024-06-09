@@ -24,9 +24,8 @@ public class Ship : MonoBehaviour
 
     public bool blueThruster = false;
 
-    public GameObject map;
 
-    public GameObject map2;
+    private bool mapOpen = false;
 
     private GameObject currentMap;
 
@@ -46,6 +45,8 @@ public class Ship : MonoBehaviour
     public int pathLength = 100; // Number of points in the path
     public float pathPointInterval = 0.1f; // Time interval between points
 
+    public CinemachineCameraZoom mapCameraZoom;
+
 
     void Start()
     {
@@ -53,13 +54,11 @@ public class Ship : MonoBehaviour
         jetEffect.SetActive(false);
         landingEffect.SetActive(false);
         blueThrust.SetActive(false);
-        map.SetActive(false);
         planetMaster = GameObject.FindObjectOfType<PlanetMaster>();
         planetInfo = planetMaster.getPlanetInfo();
         navMapVisual.SetActive(false);
-        currentMap = null;
-        pathRenderer.positionCount = pathLength;
-        pathRenderer.enabled = true;
+        // pathRenderer.positionCount = pathLength;
+        // pathRenderer.enabled = true;
 
     }
     void Update()
@@ -83,51 +82,50 @@ public class Ship : MonoBehaviour
         }
         ControlShip();
         HandleMapNavigation();
-        UpdateFlightPath();
+        // UpdateFlightPath();
 
 
 
     }
 
-    private void UpdateFlightPath()
-    {
-        Vector2 simulatedPosition = rb.position; // start at the current position
-        Vector2 simulatedVelocity = rb.velocity; // start with the current velocity
-        float mass = rb.mass; // using the spaceship's actual mass
+    // private void UpdateFlightPath()
+    // {
+    //     Vector2 simulatedPosition = rb.position; // start at the current position
+    //     Vector2 simulatedVelocity = rb.velocity; // start with the current velocity
+    //     float mass = rb.mass; // using the spaceship's actual mass
 
-        for (int i = 0; i < pathLength; i++)
-        {
-            // Simulate rotation and thrust
-            float rotation = transform.eulerAngles.z; // Adjust this if your ship can rotate during flight
-            Vector2 thrustDirection = transform.up * -1;
-            Vector2 force = Vector2.zero; // Start with no external force
+    //     // Capture the initial direction of thrust at the beginning of the path calculation
+    //     Vector2 initialThrustDirection = transform.up * -1; // thrust direction when the calculation starts
 
-            // Apply gravity from all planets
-            foreach (Planet planet in planetMaster.getPlanetInfo())
-            {
-                GameObject planetGO = planet.GetObject();
-                Rigidbody2D planetRb = planetGO.GetComponent<Rigidbody2D>();
-                force += GravitationalForceProjection(planetRb, simulatedPosition, mass, planet.GetMass());
-            }
+    //     for (int i = 0; i < pathLength; i++)
+    //     {
+    //         Vector2 force = Vector2.zero; // Start with no external force
 
-            // Assume constant thrust or modify based on your control system
-            Vector2 thrustForce = thrustDirection * thrust; // compute thrust force separately
-            simulatedVelocity += (thrustForce + force) * Time.fixedDeltaTime;
-            simulatedPosition += simulatedVelocity * Time.fixedDeltaTime;
+    //         // Apply gravity from all planets
+    //         foreach (Planet planet in planetMaster.getPlanetInfo())
+    //         {
+    //             GameObject planetGO = planet.GetObject();
+    //             Rigidbody2D planetRb = planetGO.GetComponent<Rigidbody2D>();
+    //             force += GravitationalForceProjection(planetRb, simulatedPosition, mass, planet.GetMass());
+    //         }
+            
+    //         // Only gravity affects the velocity if no thrust is applied
+    //         simulatedVelocity += force * Time.fixedDeltaTime;
+    //         simulatedPosition += simulatedVelocity * Time.fixedDeltaTime;
 
-            pathRenderer.SetPosition(i, simulatedPosition);
-        }
-    }
+    //         pathRenderer.SetPosition(i, simulatedPosition);
+    //     }
+    // }
 
-    private Vector2 GravitationalForceProjection(Rigidbody2D planetRb, Vector2 shipPosition, float shipMass, float planetMass)
-    {
-        Vector2 distanceVector = planetRb.position - shipPosition;
-        float distance = distanceVector.magnitude;
-        if (distance < 1f) distance = 1f; // Prevent division by zero or extremely high forces
-        float forceMagnitude = (G * planetMass * shipMass) / (distance * distance);
-        Vector2 force = distanceVector.normalized * forceMagnitude;
-        return force;
-    }
+    // private Vector2 GravitationalForceProjection(Rigidbody2D planetRb, Vector2 shipPosition, float shipMass, float planetMass)
+    // {
+    //     Vector2 distanceVector = planetRb.position - shipPosition;
+    //     float distance = distanceVector.magnitude;
+    //     if (distance < 1f) distance = 1f; // Prevent division by zero or extremely high forces
+    //     float forceMagnitude = (G * planetMass * shipMass) / (distance * distance);
+    //     Vector2 force = distanceVector.normalized * forceMagnitude;
+    //     return force;
+    // }
 
     private Vector2 GravitationalForce(Rigidbody2D planetRb, Rigidbody2D shipRb, float planetMass)
     {
@@ -144,7 +142,7 @@ public class Ship : MonoBehaviour
 
     private void HandleMapNavigation()
     {
-        if (currentMap == map)
+        if (mapOpen)
         {
             navMapVisual.SetActive(true);
             if (rb.velocity.magnitude > .1)
@@ -171,22 +169,17 @@ public class Ship : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if (currentMap == map)
+            if (mapOpen)
             {
-                map.SetActive(false);
-                map2.SetActive(true);
-                currentMap = map2;
-            }
-            else if (currentMap == map2)
-            {
-                map2.SetActive(false);
-                map.SetActive(false);
-                currentMap = null;
+                Debug.Log("Closing map_Preface");
+                mapOpen = false;
+                mapCameraZoom.LeaveMap();
             }
             else
             {
-                map.SetActive(true);
-                currentMap = map;
+                Debug.Log("Opening map_Preface");
+                mapCameraZoom.OpenMap();
+                mapOpen = true;
             }
         }
     }
@@ -219,6 +212,10 @@ public class Ship : MonoBehaviour
         transform.parent = newParent;
     }
 
+    
+
+    
+
     private void ApplyGravity()
     {
 
@@ -236,7 +233,7 @@ public class Ship : MonoBehaviour
         }
     }
 
-    
+
 
     void ControlShip()
     {
