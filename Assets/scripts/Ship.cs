@@ -86,9 +86,19 @@ public class Ship : MonoBehaviour
         if (currentMap == map)
         {
             navMapVisual.SetActive(true);
-            rotationalNavArrow.SetDirectionVelocity(rb.velocity);
+            if (rb.velocity.magnitude > .1)
+            {
+                velocityNavArrow.gameObject.SetActive(true);
+                velocityNavArrow.SetDirectionVelocity(rb.velocity);
+            }
+            else
+            {
+                velocityNavArrow.gameObject.SetActive(false);
+            }
+
+            
             float angle = transform.eulerAngles.z - 90 ; // Get the z-axis rotation of the ship
-            velocityNavArrow.SetDirectionRotation(angle);
+            rotationalNavArrow.SetDirectionRotation(angle);
         }
         else
         {
