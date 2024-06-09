@@ -36,7 +36,11 @@ public class Ship : MonoBehaviour
 
     private bool applyingThrust = false;
 
-    private ArrowGenerator arrowGenerator;
+    public ArrowGenerator rotationalNavArrow;
+
+    public ArrowGenerator velocityNavArrow;
+
+    public GameObject navMapVisual;
 
 
     void Start()
@@ -48,12 +52,13 @@ public class Ship : MonoBehaviour
         map.SetActive(false);
         planetMaster = GameObject.FindObjectOfType<PlanetMaster>();
         planetInfo = planetMaster.getPlanetInfo();
-        arrowGenerator = FindObjectOfType<ArrowGenerator>(); 
+        navMapVisual.SetActive(false);
+        
     }
     void Update()
     {
         HandleJetEffect();
-        CheckForMap();
+        CheckForMapInput();
         // if on a planet and not thrusting, lock the ship in place
         
     }
@@ -70,14 +75,28 @@ public class Ship : MonoBehaviour
             rb.angularVelocity = 0;
         }
         ControlShip();
+        HandleMapNavigation();
 
-        if (rb.velocity != Vector2.zero)
+            
+
+    }
+
+    private void HandleMapNavigation()
+    {
+        if (currentMap == map)
         {
-            arrowGenerator.SetDirection(rb.velocity);
+            navMapVisual.SetActive(true);
+            rotationalNavArrow.SetDirectionVelocity(rb.velocity);
+            float angle = transform.eulerAngles.z - 90 ; // Get the z-axis rotation of the ship
+            velocityNavArrow.SetDirectionRotation(angle);
+        }
+        else
+        {
+            navMapVisual.SetActive(false);
         }
     }
 
-    private void CheckForMap()
+    private void CheckForMapInput()
     {
         if (Input.GetKeyDown(KeyCode.E))
         {

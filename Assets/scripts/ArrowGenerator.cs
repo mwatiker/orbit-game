@@ -29,9 +29,14 @@ public class ArrowGenerator : MonoBehaviour
         GenerateArrow();
     }
 
-    public void SetDirection(Vector2 direction)
+    public void SetDirectionVelocity(Vector2 direction)
     {
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        this.transform.rotation = Quaternion.Euler(0, 0, angle);
+    }
+
+    public void SetDirectionRotation(float angle)
+    {
         this.transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
