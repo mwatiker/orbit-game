@@ -57,6 +57,10 @@ public class Ship : MonoBehaviour
     public float pathTimeTotal = 5f; // Total time to project the path forward, in seconds
 
     private bool updatingOrbit = false;
+
+    public GameObject flightPath;
+
+    public int startingPoint = 0;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -89,10 +93,15 @@ public class Ship : MonoBehaviour
         //     GameObject planetGO = planetInfo[0].GetObject(); // Get the first planet GameObject
         //     UpdateOrbitPathProjection(planetGO); // Update the projection
         // }
-
-        UpdateFlightPathProjection();
+        
+        // if the velocity is reasonable, update the flight path projection
+        float adjustedVelocity = (Mathf.Round(rb.velocity.magnitude * 10));
+        if (adjustedVelocity > 2f && rb.velocity.magnitude < 10000f)
+        {
+            UpdateFlightPathProjection();
+        }
         // multiply velocity by 10 and round to whole number
-        velocityText.text = (Mathf.Round(rb.velocity.magnitude * 10)).ToString() + " m/s";
+        velocityText.text = adjustedVelocity.ToString() + " m/s";
 
 
 
@@ -133,7 +142,7 @@ public class Ship : MonoBehaviour
         // Ensure LineRenderer has correct number of positions
         pathRenderer.positionCount = numPoints;
 
-        for (int i = 0; i < numPoints; i++)
+        for (int i = startingPoint; i < numPoints; i++)
         {
             Vector2 force = Vector2.zero;
 
