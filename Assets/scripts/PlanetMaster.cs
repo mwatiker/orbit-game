@@ -13,10 +13,10 @@ public class PlanetMaster : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        planetInfo = new Planet[3];
+        planetInfo = new Planet[1];
         planetInfo[0] = new Planet(planets[0],bluePlanetMass, "Blue Planet");
-        planetInfo[1] = new Planet(planets[1],redPlanetMass, "Red Planet");
-        planetInfo[2] = new Planet(planets[2], whitePlanetMass, "White Planet");
+        // planetInfo[1] = new Planet(planets[1],redPlanetMass, "Red Planet");
+        // planetInfo[2] = new Planet(planets[2], whitePlanetMass, "White Planet");
     }
 
     public Planet[] getPlanetInfo()

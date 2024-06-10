@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq; // Add this for LINQ support
 
 public class Ship : MonoBehaviour
 {
@@ -49,7 +50,11 @@ public class Ship : MonoBehaviour
 
     public float orbitRadius = 50f;
 
+    public LineRenderer orbitRenderer; // Assign this in the editor or via script
+    public int numPathPoints = 100; // Number of points in the projected path
+    public float pathTimeTotal = 5f; // Total time to project the path forward, in seconds
 
+    private bool updatingOrbit = false;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -61,6 +66,7 @@ public class Ship : MonoBehaviour
         navMapVisual.SetActive(false);
         // pathRenderer.positionCount = pathLength;
         // pathRenderer.enabled = true;
+        orbitRenderer.positionCount = numPathPoints;
 
     }
     void Update()
@@ -69,13 +75,26 @@ public class Ship : MonoBehaviour
         CheckForMapInput();
         // if on a planet and not thrusting, lock the ship in place
 
-        if (Input.GetKeyDown(KeyCode.R)) // Assuming 'O' is the key to orbit
+        if (Input.GetKeyDown(KeyCode.R)) // Key to set orbit
         {
-            GameObject planetGO = planetInfo[0].GetObject();
-            SetOrbitAndTeleport(planetGO, orbitRadius); // Example: Orbit at a radius of 50 units
+            GameObject planetGO = planetInfo[0].GetObject(); // Get the first planet GameObject
+            SetOrbitAndTeleport(planetGO, orbitRadius); // Teleport to orbit
+            updatingOrbit = true;
         }
 
+        // if (updatingOrbit)
+        // {
+        //     GameObject planetGO = planetInfo[0].GetObject(); // Get the first planet GameObject
+        //     UpdateOrbitPathProjection(planetGO); // Update the projection
+        // }
+
+        UpdateFlightPathProjection();
+
+
+
     }
+
+
 
     void FixedUpdate()
     {
@@ -94,9 +113,101 @@ public class Ship : MonoBehaviour
 
 
 
+
     }
 
-    void SetOrbitAndTeleport(GameObject planetGO, float desiredOrbitRadius)
+    private void UpdateFlightPathProjection()
+    {
+        int numPoints = pathLength;
+        float timeStep = pathPointInterval;
+        Vector2[] pathPoints = new Vector2[numPoints];
+        Vector2 simulatedPosition = rb.position;
+        Vector2 simulatedVelocity = rb.velocity;
+
+        // Ensure LineRenderer has correct number of positions
+        pathRenderer.positionCount = numPoints;
+
+        for (int i = 0; i < numPoints; i++)
+        {
+            Vector2 force = Vector2.zero;
+
+            // Calculate gravitational forces from all planets
+            foreach (Planet planet in planetInfo)
+            {
+                GameObject planetGO = planet.GetObject();
+                Rigidbody2D planetRb = planetGO.GetComponent<Rigidbody2D>();
+                force += CalculateGravitationalForce(simulatedPosition, planetRb.position, planet.GetMass(), rb.mass);
+            }
+
+            // Include thrust if applying
+            if (applyingThrust)
+            {
+                Vector2 thrustDirection = transform.up * -1;
+                float currentThrust = thrust + (Input.GetKey(KeyCode.Space) ? boostBonus : 0);
+                force += thrustDirection * currentThrust;
+            }
+
+            // Update velocity and position based on the net force
+            Vector2 acceleration = force / rb.mass;
+            simulatedVelocity += acceleration * timeStep;
+            simulatedPosition += simulatedVelocity * timeStep;
+
+            pathPoints[i] = simulatedPosition;
+        }
+
+        // Convert path points to 3D positions
+        Vector3[] pathPositions = pathPoints.Select(p => new Vector3(p.x, p.y, 0)).ToArray();
+        pathRenderer.SetPositions(pathPositions);
+
+        Debug.Log("Path calculated with " + numPoints + " points.");
+    }
+
+
+
+    private void UpdateOrbitPathProjection(GameObject planetGO)
+    {
+        Rigidbody2D planetRb = planetGO.GetComponent<Rigidbody2D>();
+        float massOfPlanet = planetInfo[0].GetMass();  // Assuming planetInfo[0] is the central planet
+
+        // Calculate the period of the orbit using the formula for orbital period
+        float orbitPeriod = 2 * Mathf.PI * Mathf.Sqrt(Mathf.Pow(orbitRadius, 3) / (G * massOfPlanet));
+
+        // Determine the number of points needed for a smooth orbit visualization
+        int numPoints = numPathPoints;
+        float timeStep = orbitPeriod / numPoints;
+
+        Vector2[] pathPoints = new Vector2[numPoints];
+        Vector2 simulatedPosition = rb.position;
+        Vector2 simulatedVelocity = rb.velocity;
+
+        for (int i = 0; i < numPoints; i++)
+        {
+            Vector2 force = CalculateGravitationalForce(simulatedPosition, planetRb.position, massOfPlanet, rb.mass);
+            Vector2 acceleration = force / rb.mass;
+
+            simulatedVelocity += acceleration * timeStep;
+            simulatedPosition += simulatedVelocity * timeStep;
+
+            pathPoints[i] = simulatedPosition;
+        }
+
+        Vector3[] pathPositions = pathPoints.Select(p => new Vector3(p.x, p.y, 0)).ToArray();
+        orbitRenderer.SetPositions(pathPositions);
+    }
+
+
+
+
+
+    Vector2 CalculateGravitationalForce(Vector2 shipPos, Vector2 planetPos, float planetMass, float shipMass)
+    {
+        Vector2 distanceVec = planetPos - shipPos;
+        float distance = distanceVec.magnitude;
+        float forceMagnitude = (G * planetMass * shipMass) / (distance * distance);
+        return distanceVec.normalized * forceMagnitude;
+    }
+
+    private void SetOrbitAndTeleport(GameObject planetGO, float desiredOrbitRadius)
     {
         Rigidbody2D planetRb = planetGO.GetComponent<Rigidbody2D>();
         // Calculate the position for the ship along the desired orbit radius
@@ -175,6 +286,7 @@ public class Ship : MonoBehaviour
             {
                 velocityNavArrow.gameObject.SetActive(true);
                 velocityNavArrow.SetDirectionVelocity(rb.velocity);
+                velocityNavArrow.ActivateVelocityText();
             }
             else
             {
