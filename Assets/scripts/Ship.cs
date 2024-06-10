@@ -23,6 +23,8 @@ public class Ship : MonoBehaviour
 
     public bool blueThruster = false;
 
+    public TMPro.TextMeshProUGUI velocityText;
+
 
     private bool mapOpen = false;
 
@@ -89,10 +91,14 @@ public class Ship : MonoBehaviour
         // }
 
         UpdateFlightPathProjection();
+        // multiply velocity by 10 and round to whole number
+        velocityText.text = (Mathf.Round(rb.velocity.magnitude * 10)).ToString() + " m/s";
+
 
 
 
     }
+
 
 
 
@@ -139,13 +145,13 @@ public class Ship : MonoBehaviour
                 force += CalculateGravitationalForce(simulatedPosition, planetRb.position, planet.GetMass(), rb.mass);
             }
 
-            // Include thrust if applying
-            if (applyingThrust)
-            {
-                Vector2 thrustDirection = transform.up * -1;
-                float currentThrust = thrust + (Input.GetKey(KeyCode.Space) ? boostBonus : 0);
-                force += thrustDirection * currentThrust;
-            }
+            // // Include thrust if applying
+            // if (applyingThrust)
+            // {
+            //     Vector2 thrustDirection = transform.up * -1;
+            //     float currentThrust = thrust + (Input.GetKey(KeyCode.Space) ? boostBonus : 0);
+            //     force += thrustDirection * currentThrust;
+            // }
 
             // Update velocity and position based on the net force
             Vector2 acceleration = force / rb.mass;
@@ -282,18 +288,6 @@ public class Ship : MonoBehaviour
         if (mapOpen)
         {
             navMapVisual.SetActive(true);
-            if (rb.velocity.magnitude > .1)
-            {
-                velocityNavArrow.gameObject.SetActive(true);
-                velocityNavArrow.SetDirectionVelocity(rb.velocity);
-                velocityNavArrow.ActivateVelocityText();
-            }
-            else
-            {
-                velocityNavArrow.gameObject.SetActive(false);
-            }
-
-
             float angle = transform.eulerAngles.z - 90; // Get the z-axis rotation of the ship
             rotationalNavArrow.SetDirectionRotation(angle);
         }

@@ -17,73 +17,24 @@ public class ArrowGenerator : MonoBehaviour
 
     public float circleRadius = 0;
 
-    public GameObject textBox;  // Assign the text box GameObject in the inspector
-
     public float speedometerOffset = 0f;
 
     private float currentVelocity;
 
-    private TMPro.TextMeshProUGUI textComponent;
+   
 
     void Start()
     {
         //make sure Mesh Renderer has a material
         mesh = new Mesh();
         this.GetComponent<MeshFilter>().mesh = mesh;
-        if (textBox != null)
-        {
-            textBox.SetActive(false);
-            // Get the text component from the text box
-            textComponent = textBox.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-            
-        }
+    
     }
 
     void Update()
     {
         GenerateArrow();
         
-    }
-
-    void FixedUpdate()
-    {
-        UpdateTextBox();
-    }
-
-    private void UpdateTextBox()
-    {
-        if (textBox != null)
-        {
-            UpdateTextBoxPosition();
-            UpdateTextBoxText();
-        }
-    }
-
-    private void UpdateTextBoxPosition()
-    {
-        if (textBox != null)
-        {
-            // Calculate the full length of the arrow (stem + tip)
-            float totalArrowLength = stemLength + tipLength;
-
-            // Determine the tip's position in local space
-            Vector3 tipLocalPosition = new Vector3(totalArrowLength + speedometerOffset, 0, 0);
-
-            // Adjust tip position based on the arrow's current rotation
-            Vector3 tipWorldPosition = this.transform.TransformPoint(tipLocalPosition);
-
-            // Set the new position for the text box in world space
-            textBox.transform.position = tipWorldPosition;
-
-            // Optionally, keep the text box rotation aligned with the canvas if needed
-            textBox.transform.rotation = Quaternion.identity;
-        }
-    }
-
-    private void UpdateTextBoxText()
-    {
-        currentVelocity = Mathf.Round(currentVelocity * 10f);
-        textComponent.text = currentVelocity.ToString() + " m/s";
     }
 
 
@@ -152,12 +103,5 @@ public class ArrowGenerator : MonoBehaviour
         mesh.triangles = trianglesList.ToArray();
     }
 
-    public void ActivateVelocityText()
-    {
-        if (textBox.activeSelf == false)
-        {
-            textBox.SetActive(true);
-        }
-        
-    }
+
 }
