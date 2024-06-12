@@ -14,4 +14,12 @@ public class PathTip : MonoBehaviour
             ship.HaltPathProjection();
         }
     }
+
+    void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Planet")
+        {
+            ship.AllowPathProjection();
+        }
+    }
 }

@@ -78,6 +78,12 @@ public class Ship : MonoBehaviour
 
     private InGameDebug ingameDebug;
 
+    private float adjustedVelocity;
+
+    public float gravityDebugMultiplier = 1000f;
+
+    private int pathCollisionsNumber = 0;
+
 
 
     void Start()
@@ -124,7 +130,7 @@ public class Ship : MonoBehaviour
         // }
 
         // if the velocity is reasonable, update the flight path projection
-        float adjustedVelocity = (Mathf.Round(rb.velocity.magnitude * 10));
+        adjustedVelocity = (Mathf.Round(rb.velocity.magnitude * 10));
         if (adjustedVelocity > 2f && rb.velocity.magnitude < 10000f)
         {
             UpdateFlightPathProjection();
@@ -165,9 +171,9 @@ public class Ship : MonoBehaviour
 
     private void DebugDiagostics()
     {
-        ingameDebug.UpdateVelocityDebug(rb.velocity.magnitude);
+        ingameDebug.UpdateVelocityDebug(adjustedVelocity);
         ingameDebug.UpdateAngularVelocityDebug(rb.angularVelocity);
-        ingameDebug.UpdateGravitationalForceDebug(currentGravitationalForce);
+        ingameDebug.UpdateGravitationalForceDebug(currentGravitationalForce*gravityDebugMultiplier);
 
 
     }
@@ -206,8 +212,9 @@ public class Ship : MonoBehaviour
 
         for (int i = startingPoint; i < numPoints; i++)
         {
-            if (pathInterrupted)
+            if (pathCollisionsNumber > 0)
             {
+                Debug.Log("Path projection interrupted");
                 break;  // Stop calculating beyond the collision point
             }
 
@@ -289,7 +296,6 @@ public class Ship : MonoBehaviour
         float epsilon = 0.1f; // Prevent division by extremely small distances
         distance = Mathf.Max(distance, epsilon);
         float forceMagnitude = (G * planetMass * shipMass) / (distance * distance);
-        currentGravitationalForce = forceMagnitude;
         return distanceVec.normalized * forceMagnitude;
     }
 
@@ -440,6 +446,7 @@ public class Ship : MonoBehaviour
             {
                 planetMass = planet.GetMass();
                 Vector2 force = GravitationalForce(planetRb, rb, planetMass);
+                currentGravitationalForce = force.magnitude;
                 rb.AddForce(force);
             }
         }
@@ -503,6 +510,11 @@ public class Ship : MonoBehaviour
 
     public void HaltPathProjection()
     {
-        //pathInterrupted = true;
+        pathCollisionsNumber++;
+    }
+
+    public void AllowPathProjection()
+    {
+        pathCollisionsNumber--;
     }
 }

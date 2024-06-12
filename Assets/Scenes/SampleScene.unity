@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 33412150}
   - component: {fileID: 33412152}
   m_Layer: 0
-  m_Name: Button_Large_A
+  m_Name: Diagnostics
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -155,10 +155,10 @@ RectTransform:
   - {fileID: 1351264440}
   - {fileID: 462478542}
   - {fileID: 800074751}
-  - {fileID: 511342472}
   - {fileID: 1365921018}
-  - {fileID: 487879332}
   - {fileID: 80529837}
+  - {fileID: 511342472}
+  - {fileID: 487879332}
   - {fileID: 643461447}
   - {fileID: 72807089}
   - {fileID: 1758139229}
@@ -337,7 +337,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1.12, y: -1.2455999}
+  m_AnchoredPosition: {x: 1.7799999, y: -1.2455995}
   m_SizeDelta: {x: 2.886576, y: 3.997}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &80529838
@@ -360,9 +360,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '100
-
-'
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2384,7 +2382,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1.12, y: -0.089759946}
+  m_AnchoredPosition: {x: 1.7799999, y: -0.089760184}
   m_SizeDelta: {x: 2.886576, y: 3.997}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &800074752
@@ -2407,7 +2405,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 400
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2606,8 +2604,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1054778832}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3234,6 +3232,7 @@ MonoBehaviour:
   endpointCollider: {fileID: 458297115}
   colliderPrefab: {fileID: 458297115}
   numberOfColliders: 15
+  gravityDebugMultiplier: 1
 --- !u!212 &1001012854
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3408,9 +3407,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8842ad17427663948bd6a4c3afeefeb8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocityText: {fileID: 0}
-  angularVelocityText: {fileID: 0}
-  gravitationalForceText: {fileID: 0}
+  velocityText: {fileID: 800074752}
+  angularVelocityText: {fileID: 1365921019}
+  gravitationalForceText: {fileID: 80529838}
 --- !u!1 &1003274541
 GameObject:
   m_ObjectHideFlags: 0
@@ -4458,7 +4457,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1.12, y: -0.66600025}
+  m_AnchoredPosition: {x: 1.7799999, y: -0.66600025}
   m_SizeDelta: {x: 2.886576, y: 3.997}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1365921019
@@ -4481,7 +4480,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 200
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5184,7 +5183,7 @@ GameObject:
   - component: {fileID: 1758139231}
   - component: {fileID: 1758139230}
   m_Layer: 0
-  m_Name: Horizontal Divider (1)
+  m_Name: Horizontal Divider1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5996,7 +5995,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 654028782843525526, guid: fafdf1206c1237f4cbcc5e28af2fba90, type: 3}
       propertyPath: m_Name
-      value: ArrowTip
+      value: FlightPathCollider
       objectReference: {fileID: 0}
     - target: {fileID: 7153058408068876558, guid: fafdf1206c1237f4cbcc5e28af2fba90, type: 3}
       propertyPath: ship
