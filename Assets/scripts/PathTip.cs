@@ -9,10 +9,8 @@ public class PathTip : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("Path hit something!" + collision.gameObject.tag);
         if (collision.gameObject.tag == "Planet")
         {
-            Debug.Log("Path hit a planet!");
             ship.HaltPathProjection();
         }
     }

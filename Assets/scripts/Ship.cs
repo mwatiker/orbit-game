@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq; // Add this for LINQ support
 
+
 public class Ship : MonoBehaviour
 {
     public float G = 6.674f; // Adjusted gravitational constant for the game
@@ -23,7 +24,7 @@ public class Ship : MonoBehaviour
 
     public bool blueThruster = false;
 
-    public TMPro.TextMeshProUGUI velocityText;
+    
 
 
     private bool mapOpen = false;
@@ -73,6 +74,11 @@ public class Ship : MonoBehaviour
     public int numberOfColliders = 10; // Number of colliders to distribute along the path
     private GameObject[] colliders; // Array to hold the collider instances
 
+    private float currentGravitationalForce;
+
+    private InGameDebug ingameDebug;
+
+
 
     void Start()
     {
@@ -87,6 +93,8 @@ public class Ship : MonoBehaviour
         // pathRenderer.enabled = true;
         orbitRenderer.positionCount = numPathPoints;
         SetupEndpointDetection();
+        // Find the InGameDebug component that is attached to this GameObject
+        ingameDebug = GetComponent<InGameDebug>();
 
         colliders = new GameObject[numberOfColliders];
         for (int i = 0; i < numberOfColliders; i++)
@@ -121,10 +129,11 @@ public class Ship : MonoBehaviour
         {
             UpdateFlightPathProjection();
         }
-        // multiply velocity by 10 and round to whole number
-        velocityText.text = adjustedVelocity.ToString() + " m/s";
+
 
         UpdateEndpointColliderPosition(); // Update the position of the collider
+
+        DebugDiagostics();
 
 
 
@@ -150,6 +159,15 @@ public class Ship : MonoBehaviour
         // UpdateFlightPath();
 
 
+
+
+    }
+
+    private void DebugDiagostics()
+    {
+        ingameDebug.UpdateVelocityDebug(rb.velocity.magnitude);
+        ingameDebug.UpdateAngularVelocityDebug(rb.angularVelocity);
+        ingameDebug.UpdateGravitationalForceDebug(currentGravitationalForce);
 
 
     }
@@ -271,6 +289,7 @@ public class Ship : MonoBehaviour
         float epsilon = 0.1f; // Prevent division by extremely small distances
         distance = Mathf.Max(distance, epsilon);
         float forceMagnitude = (G * planetMass * shipMass) / (distance * distance);
+        currentGravitationalForce = forceMagnitude;
         return distanceVec.normalized * forceMagnitude;
     }
 
