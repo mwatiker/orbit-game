@@ -15,26 +15,25 @@ public class ArrowGenerator : MonoBehaviour
 
     Mesh mesh;
 
+    public GameObject tipColliderObject;
+
     public float circleRadius = 0;
 
     public float speedometerOffset = 0f;
 
     private float currentVelocity;
-
-   
-
     void Start()
     {
         //make sure Mesh Renderer has a material
         mesh = new Mesh();
         this.GetComponent<MeshFilter>().mesh = mesh;
+
     
     }
 
     void Update()
     {
         GenerateArrow();
-        
     }
 
 
@@ -102,6 +101,7 @@ public class ArrowGenerator : MonoBehaviour
         mesh.vertices = verticesList.ToArray();
         mesh.triangles = trianglesList.ToArray();
     }
+
 
 
 }

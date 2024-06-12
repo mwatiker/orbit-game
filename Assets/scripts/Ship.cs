@@ -61,6 +61,19 @@ public class Ship : MonoBehaviour
     public GameObject flightPath;
 
     public int startingPoint = 0;
+
+    public GameObject endpointCollider; // The collider object
+
+    private bool pathInterrupted = false;
+
+    private int interruptIndex = 0;  // Index where the path should be interrupted
+
+    public GameObject colliderPrefab; // Prefab for the colliders
+
+    public int numberOfColliders = 10; // Number of colliders to distribute along the path
+    private GameObject[] colliders; // Array to hold the collider instances
+
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -73,6 +86,13 @@ public class Ship : MonoBehaviour
         // pathRenderer.positionCount = pathLength;
         // pathRenderer.enabled = true;
         orbitRenderer.positionCount = numPathPoints;
+        SetupEndpointDetection();
+
+        colliders = new GameObject[numberOfColliders];
+        for (int i = 0; i < numberOfColliders; i++)
+        {
+            colliders[i] = Instantiate(colliderPrefab, Vector3.zero, Quaternion.identity);
+        }
 
     }
     void Update()
@@ -86,6 +106,7 @@ public class Ship : MonoBehaviour
             GameObject planetGO = planetInfo[0].GetObject(); // Get the first planet GameObject
             SetOrbitAndTeleport(planetGO, orbitRadius); // Teleport to orbit
             updatingOrbit = true;
+            pathInterrupted = false;
         }
 
         // if (updatingOrbit)
@@ -93,7 +114,7 @@ public class Ship : MonoBehaviour
         //     GameObject planetGO = planetInfo[0].GetObject(); // Get the first planet GameObject
         //     UpdateOrbitPathProjection(planetGO); // Update the projection
         // }
-        
+
         // if the velocity is reasonable, update the flight path projection
         float adjustedVelocity = (Mathf.Round(rb.velocity.magnitude * 10));
         if (adjustedVelocity > 2f && rb.velocity.magnitude < 10000f)
@@ -102,6 +123,8 @@ public class Ship : MonoBehaviour
         }
         // multiply velocity by 10 and round to whole number
         velocityText.text = adjustedVelocity.ToString() + " m/s";
+
+        UpdateEndpointColliderPosition(); // Update the position of the collider
 
 
 
@@ -131,7 +154,29 @@ public class Ship : MonoBehaviour
 
     }
 
-    private void UpdateFlightPathProjection()
+    private void SetupEndpointDetection()
+    {
+        if (pathRenderer != null && endpointCollider != null)
+        {
+            // Set the collider position to the last point of the LineRenderer
+            endpointCollider.transform.position = pathRenderer.GetPosition(pathRenderer.positionCount - 1);
+        }
+    }
+
+    private void UpdateEndpointColliderPosition()
+    {
+        if (pathRenderer != null && endpointCollider != null)
+        {
+            endpointCollider.transform.position = pathRenderer.GetPosition(pathRenderer.positionCount - 1);
+            Vector3 lastPoint = pathRenderer.GetPosition(pathRenderer.positionCount - 1);
+            endpointCollider.transform.position = new Vector3(lastPoint.x, lastPoint.y, endpointCollider.transform.position.z);
+        }
+    }
+
+
+
+
+    public void UpdateFlightPathProjection()
     {
         int numPoints = pathLength;
         float timeStep = pathPointInterval;
@@ -139,14 +184,16 @@ public class Ship : MonoBehaviour
         Vector2 simulatedPosition = rb.position;
         Vector2 simulatedVelocity = rb.velocity;
 
-        // Ensure LineRenderer has correct number of positions
         pathRenderer.positionCount = numPoints;
 
         for (int i = startingPoint; i < numPoints; i++)
         {
-            Vector2 force = Vector2.zero;
+            if (pathInterrupted)
+            {
+                break;  // Stop calculating beyond the collision point
+            }
 
-            // Calculate gravitational forces from all planets
+            Vector2 force = Vector2.zero;
             foreach (Planet planet in planetInfo)
             {
                 GameObject planetGO = planet.GetObject();
@@ -154,15 +201,6 @@ public class Ship : MonoBehaviour
                 force += CalculateGravitationalForce(simulatedPosition, planetRb.position, planet.GetMass(), rb.mass);
             }
 
-            // // Include thrust if applying
-            // if (applyingThrust)
-            // {
-            //     Vector2 thrustDirection = transform.up * -1;
-            //     float currentThrust = thrust + (Input.GetKey(KeyCode.Space) ? boostBonus : 0);
-            //     force += thrustDirection * currentThrust;
-            // }
-
-            // Update velocity and position based on the net force
             Vector2 acceleration = force / rb.mass;
             simulatedVelocity += acceleration * timeStep;
             simulatedPosition += simulatedVelocity * timeStep;
@@ -170,13 +208,25 @@ public class Ship : MonoBehaviour
             pathPoints[i] = simulatedPosition;
         }
 
-        // Convert path points to 3D positions
         Vector3[] pathPositions = pathPoints.Select(p => new Vector3(p.x, p.y, 0)).ToArray();
         pathRenderer.SetPositions(pathPositions);
 
-        Debug.Log("Path calculated with " + numPoints + " points.");
+        // Update collider positions
+        UpdateCollidersPosition(pathPoints);
     }
 
+    public void UpdateCollidersPosition(Vector2[] pathPoints)
+    {
+        int step = pathLength / numberOfColliders;
+        for (int i = 0; i < numberOfColliders; i++)
+        {
+            int index = i * step;
+            if (index < pathPoints.Length)
+            {
+                colliders[i].transform.position = new Vector3(pathPoints[index].x, pathPoints[index].y, 0);
+            }
+        }
+    }
 
 
     private void UpdateOrbitPathProjection(GameObject planetGO)
@@ -218,6 +268,8 @@ public class Ship : MonoBehaviour
     {
         Vector2 distanceVec = planetPos - shipPos;
         float distance = distanceVec.magnitude;
+        float epsilon = 0.1f; // Prevent division by extremely small distances
+        distance = Mathf.Max(distance, epsilon);
         float forceMagnitude = (G * planetMass * shipMass) / (distance * distance);
         return distanceVec.normalized * forceMagnitude;
     }
@@ -406,7 +458,7 @@ public class Ship : MonoBehaviour
         }
     }
 
-    void HandleJetEffect()
+    private void HandleJetEffect()
     {
         float thrustInput = Input.GetAxis("Vertical");
 
@@ -428,5 +480,10 @@ public class Ship : MonoBehaviour
             jetEffect.SetActive(false); // Hide jet effect when not thrusting
             applyingThrust = false;
         }
+    }
+
+    public void HaltPathProjection()
+    {
+        //pathInterrupted = true;
     }
 }

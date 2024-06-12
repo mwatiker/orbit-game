@@ -18,14 +18,23 @@ public class CinemachineCameraZoom : MonoBehaviour
     private float originalOrthoSize;
     private Vector3 originalPosition;
 
+    // Edge scrolling settings
+    public float edgeScrollSpeed = 5.0f;
+    public float edgeBoundary = 50.0f; // Pixels from the edge to trigger scrolling
+
+    private Vector2 screenBounds;
+
+    public bool isShipCamera = false;
+
 
     
 
 
-    private void Start()
+    void Start()
     {
         originalOrthoSize = cinemachineCamera.m_Lens.OrthographicSize;
         originalPosition = cinemachineCamera.transform.position;
+        screenBounds = new Vector2(Screen.width, Screen.height);
     }
 
     void Update()
@@ -33,7 +42,31 @@ public class CinemachineCameraZoom : MonoBehaviour
         if (IsCameraActive())
         {
             ZoomCamera();
+            if (!isShipCamera)
+            {
+                MoveCamera();
+            }
+            
         }
+    }
+
+    private void MoveCamera()
+    {
+        Vector3 cameraMove = Vector3.zero;
+        Vector3 mousePosition = Input.mousePosition;
+
+        // Check if the mouse is near the screen boundaries and move the camera accordingly
+        if (mousePosition.x < edgeBoundary)
+            cameraMove.x = -edgeScrollSpeed;
+        else if (mousePosition.x > screenBounds.x - edgeBoundary)
+            cameraMove.x = edgeScrollSpeed;
+
+        if (mousePosition.y < edgeBoundary)
+            cameraMove.y = -edgeScrollSpeed;
+        else if (mousePosition.y > screenBounds.y - edgeBoundary)
+            cameraMove.y = edgeScrollSpeed;
+
+        cinemachineCamera.transform.position += cameraMove * Time.deltaTime;
     }
 
     public bool IsCameraActive()
