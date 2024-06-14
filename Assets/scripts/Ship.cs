@@ -85,6 +85,9 @@ public class Ship : MonoBehaviour
 
     private int numPoints;
 
+    public int flightPathSpeed = 1;
+
+
 
 
 
@@ -137,7 +140,9 @@ public class Ship : MonoBehaviour
         adjustedVelocity = (Mathf.Round(rb.velocity.magnitude * 10));
         if (adjustedVelocity > 2f && rb.velocity.magnitude < 10000f)
         {
+
             UpdateFlightPathProjection();
+
         }
 
 
@@ -220,6 +225,8 @@ public class Ship : MonoBehaviour
         pathRenderer.SetPositions(pathPositions);
 
         UpdateCollidersPosition(pathPoints); // Adjust this method if needed to support partial path
+
+        pathLength = pathLength + flightPathSpeed;
     }
 
     private void UpdateCollidersPosition(Vector2[] pathPoints)
@@ -471,10 +478,12 @@ public class Ship : MonoBehaviour
 
     public void AllowPathProjection(int index)
     {
-        Debug.Log("Allowing path projection"+ index);
-        if (index == interruptIndex || index == interruptIndex + 1)
+        Debug.Log("Allowing path projection" + index);
+        if (index == interruptIndex)
         {
-            interruptIndex = index;
+            interruptIndex = index + 1;
         }
     }
+
+    y
 }

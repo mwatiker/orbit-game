@@ -3226,12 +3226,13 @@ MonoBehaviour:
   orbitRadius: 100
   orbitRenderer: {fileID: 1405800598}
   numPathPoints: 500
-  pathTimeTotal: 10.6
+  pathTimeTotal: 5
   flightPath: {fileID: 1826699206}
   startingPoint: 0
   colliderPrefab: {fileID: 458297115}
   numberOfColliders: 400
   gravityDebugMultiplier: 1
+  flightPathSpeed: 5
 --- !u!212 &1001012854
 SpriteRenderer:
   m_ObjectHideFlags: 0
