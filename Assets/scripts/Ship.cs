@@ -24,7 +24,7 @@ public class Ship : MonoBehaviour
 
     public bool blueThruster = false;
 
-    
+
 
 
     private bool mapOpen = false;
@@ -63,7 +63,6 @@ public class Ship : MonoBehaviour
 
     public int startingPoint = 0;
 
-    public GameObject endpointCollider; // The collider object
 
     private bool pathInterrupted = false;
 
@@ -84,6 +83,11 @@ public class Ship : MonoBehaviour
 
     private int pathCollisionsNumber = 0;
 
+    private int numPoints;
+
+
+
+
 
 
     void Start()
@@ -98,7 +102,6 @@ public class Ship : MonoBehaviour
         // pathRenderer.positionCount = pathLength;
         // pathRenderer.enabled = true;
         orbitRenderer.positionCount = numPathPoints;
-        SetupEndpointDetection();
         // Find the InGameDebug component that is attached to this GameObject
         ingameDebug = GetComponent<InGameDebug>();
 
@@ -106,7 +109,9 @@ public class Ship : MonoBehaviour
         for (int i = 0; i < numberOfColliders; i++)
         {
             colliders[i] = Instantiate(colliderPrefab, Vector3.zero, Quaternion.identity);
+            colliders[i].GetComponent<PathTip>().SetColliderIndex(i);
         }
+        SetCollidersNumPoint();
 
     }
     void Update()
@@ -121,13 +126,12 @@ public class Ship : MonoBehaviour
             SetOrbitAndTeleport(planetGO, orbitRadius); // Teleport to orbit
             updatingOrbit = true;
             pathInterrupted = false;
+            for (int i = 0; i < numberOfColliders; i++)
+            {
+                colliders[i].SetActive(true);
+            }
         }
 
-        // if (updatingOrbit)
-        // {
-        //     GameObject planetGO = planetInfo[0].GetObject(); // Get the first planet GameObject
-        //     UpdateOrbitPathProjection(planetGO); // Update the projection
-        // }
 
         // if the velocity is reasonable, update the flight path projection
         adjustedVelocity = (Mathf.Round(rb.velocity.magnitude * 10));
@@ -136,8 +140,6 @@ public class Ship : MonoBehaviour
             UpdateFlightPathProjection();
         }
 
-
-        UpdateEndpointColliderPosition(); // Update the position of the collider
 
         DebugDiagostics();
 
@@ -173,36 +175,23 @@ public class Ship : MonoBehaviour
     {
         ingameDebug.UpdateVelocityDebug(adjustedVelocity);
         ingameDebug.UpdateAngularVelocityDebug(rb.angularVelocity);
-        ingameDebug.UpdateGravitationalForceDebug(currentGravitationalForce*gravityDebugMultiplier);
+        ingameDebug.UpdateGravitationalForceDebug(currentGravitationalForce * gravityDebugMultiplier);
 
 
     }
-
-    private void SetupEndpointDetection()
-    {
-        if (pathRenderer != null && endpointCollider != null)
-        {
-            // Set the collider position to the last point of the LineRenderer
-            endpointCollider.transform.position = pathRenderer.GetPosition(pathRenderer.positionCount - 1);
-        }
-    }
-
-    private void UpdateEndpointColliderPosition()
-    {
-        if (pathRenderer != null && endpointCollider != null)
-        {
-            endpointCollider.transform.position = pathRenderer.GetPosition(pathRenderer.positionCount - 1);
-            Vector3 lastPoint = pathRenderer.GetPosition(pathRenderer.positionCount - 1);
-            endpointCollider.transform.position = new Vector3(lastPoint.x, lastPoint.y, endpointCollider.transform.position.z);
-        }
-    }
-
 
 
 
     public void UpdateFlightPathProjection()
     {
-        int numPoints = pathLength;
+        if (pathInterrupted)
+        {
+            numPoints = colliders[interruptIndex].GetComponent<PathTip>().GetNumPoint();
+        }
+        else
+        {
+            numPoints = pathLength;
+        }
         float timeStep = pathPointInterval;
         Vector2[] pathPoints = new Vector2[numPoints];
         Vector2 simulatedPosition = rb.position;
@@ -212,12 +201,6 @@ public class Ship : MonoBehaviour
 
         for (int i = startingPoint; i < numPoints; i++)
         {
-            if (pathCollisionsNumber > 0)
-            {
-                Debug.Log("Path projection interrupted");
-                break;  // Stop calculating beyond the collision point
-            }
-
             Vector2 force = Vector2.zero;
             foreach (Planet planet in planetInfo)
             {
@@ -236,11 +219,10 @@ public class Ship : MonoBehaviour
         Vector3[] pathPositions = pathPoints.Select(p => new Vector3(p.x, p.y, 0)).ToArray();
         pathRenderer.SetPositions(pathPositions);
 
-        // Update collider positions
-        UpdateCollidersPosition(pathPoints);
+        UpdateCollidersPosition(pathPoints); // Adjust this method if needed to support partial path
     }
 
-    public void UpdateCollidersPosition(Vector2[] pathPoints)
+    private void UpdateCollidersPosition(Vector2[] pathPoints)
     {
         int step = pathLength / numberOfColliders;
         for (int i = 0; i < numberOfColliders; i++)
@@ -252,6 +234,18 @@ public class Ship : MonoBehaviour
             }
         }
     }
+
+    private void SetCollidersNumPoint()
+    {
+        int step = pathLength / numberOfColliders;
+        for (int i = 0; i < numberOfColliders; i++)
+        {
+            int index = i * step;
+            colliders[i].GetComponent<PathTip>().SetNumPoint(index);
+        }
+    }
+
+
 
 
     private void UpdateOrbitPathProjection(GameObject planetGO)
@@ -316,45 +310,6 @@ public class Ship : MonoBehaviour
         rb.velocity = orbitDirection * orbitSpeed; // Set velocity tangent to the orbit
     }
 
-
-    // private void UpdateFlightPath()
-    // {
-    //     Vector2 simulatedPosition = rb.position; // start at the current position
-    //     Vector2 simulatedVelocity = rb.velocity; // start with the current velocity
-    //     float mass = rb.mass; // using the spaceship's actual mass
-
-    //     // Capture the initial direction of thrust at the beginning of the path calculation
-    //     Vector2 initialThrustDirection = transform.up * -1; // thrust direction when the calculation starts
-
-    //     for (int i = 0; i < pathLength; i++)
-    //     {
-    //         Vector2 force = Vector2.zero; // Start with no external force
-
-    //         // Apply gravity from all planets
-    //         foreach (Planet planet in planetMaster.getPlanetInfo())
-    //         {
-    //             GameObject planetGO = planet.GetObject();
-    //             Rigidbody2D planetRb = planetGO.GetComponent<Rigidbody2D>();
-    //             force += GravitationalForceProjection(planetRb, simulatedPosition, mass, planet.GetMass());
-    //         }
-
-    //         // Only gravity affects the velocity if no thrust is applied
-    //         simulatedVelocity += force * Time.fixedDeltaTime;
-    //         simulatedPosition += simulatedVelocity * Time.fixedDeltaTime;
-
-    //         pathRenderer.SetPosition(i, simulatedPosition);
-    //     }
-    // }
-
-    // private Vector2 GravitationalForceProjection(Rigidbody2D planetRb, Vector2 shipPosition, float shipMass, float planetMass)
-    // {
-    //     Vector2 distanceVector = planetRb.position - shipPosition;
-    //     float distance = distanceVector.magnitude;
-    //     if (distance < 1f) distance = 1f; // Prevent division by zero or extremely high forces
-    //     float forceMagnitude = (G * planetMass * shipMass) / (distance * distance);
-    //     Vector2 force = distanceVector.normalized * forceMagnitude;
-    //     return force;
-    // }
 
     private Vector2 GravitationalForce(Rigidbody2D planetRb, Rigidbody2D shipRb, float planetMass)
     {
@@ -508,13 +463,18 @@ public class Ship : MonoBehaviour
         }
     }
 
-    public void HaltPathProjection()
+    public void HaltPathProjection(int index)
     {
-        pathCollisionsNumber++;
+        pathInterrupted = true;
+        interruptIndex = index;
     }
 
-    public void AllowPathProjection()
+    public void AllowPathProjection(int index)
     {
-        pathCollisionsNumber--;
+        Debug.Log("Allowing path projection"+ index);
+        if (index == interruptIndex || index == interruptIndex + 1)
+        {
+            interruptIndex = index;
+        }
     }
 }

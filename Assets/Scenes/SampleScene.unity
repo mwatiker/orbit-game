@@ -3229,9 +3229,8 @@ MonoBehaviour:
   pathTimeTotal: 10.6
   flightPath: {fileID: 1826699206}
   startingPoint: 0
-  endpointCollider: {fileID: 458297115}
   colliderPrefab: {fileID: 458297115}
-  numberOfColliders: 15
+  numberOfColliders: 400
   gravityDebugMultiplier: 1
 --- !u!212 &1001012854
 SpriteRenderer:
