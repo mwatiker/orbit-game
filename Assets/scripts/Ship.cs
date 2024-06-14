@@ -12,16 +12,6 @@ public class Ship : MonoBehaviour
     private Rigidbody2D rb;
 
 
-
-
-
-
-
-
-    private bool mapOpen = false;
-
-    private GameObject currentMap;
-
     private PlanetMaster planetMaster;
 
     private Planet[] planetInfo;
@@ -44,7 +34,7 @@ public class Ship : MonoBehaviour
 
     public LineRenderer orbitRenderer; // Assign this in the editor or via script
     public int numPathPoints = 100; // Number of points in the projected path
-    public float pathTimeTotal = 5f; // Total time to project the path forward, in seconds
+
 
     private bool updatingOrbit = false;
 
@@ -108,7 +98,7 @@ public class Ship : MonoBehaviour
     }
     void Update()
     {
-        CheckForMapInput();
+
         // if on a planet and not thrusting, lock the ship in place
 
         if (Input.GetKeyDown(KeyCode.R)) // Key to set orbit
@@ -156,8 +146,7 @@ public class Ship : MonoBehaviour
             rb.angularVelocity = 0;
         }
 
-        HandleMapNavigation();
-        // UpdateFlightPath();
+    
 
 
 
@@ -243,36 +232,7 @@ public class Ship : MonoBehaviour
 
 
 
-    private void UpdateOrbitPathProjection(GameObject planetGO)
-    {
-        Rigidbody2D planetRb = planetGO.GetComponent<Rigidbody2D>();
-        float massOfPlanet = planetInfo[0].GetMass();  // Assuming planetInfo[0] is the central planet
-
-        // Calculate the period of the orbit using the formula for orbital period
-        float orbitPeriod = 2 * Mathf.PI * Mathf.Sqrt(Mathf.Pow(orbitRadius, 3) / (G * massOfPlanet));
-
-        // Determine the number of points needed for a smooth orbit visualization
-        int numPoints = numPathPoints;
-        float timeStep = orbitPeriod / numPoints;
-
-        Vector2[] pathPoints = new Vector2[numPoints];
-        Vector2 simulatedPosition = rb.position;
-        Vector2 simulatedVelocity = rb.velocity;
-
-        for (int i = 0; i < numPoints; i++)
-        {
-            Vector2 force = CalculateGravitationalForce(simulatedPosition, planetRb.position, massOfPlanet, rb.mass);
-            Vector2 acceleration = force / rb.mass;
-
-            simulatedVelocity += acceleration * timeStep;
-            simulatedPosition += simulatedVelocity * timeStep;
-
-            pathPoints[i] = simulatedPosition;
-        }
-
-        Vector3[] pathPositions = pathPoints.Select(p => new Vector3(p.x, p.y, 0)).ToArray();
-        orbitRenderer.SetPositions(pathPositions);
-    }
+    
 
 
 
@@ -313,43 +273,6 @@ public class Ship : MonoBehaviour
         float forceMagnitude = (G * planetMass * shipRb.mass) / (distance * distance);
         Vector2 force = distanceVector.normalized * forceMagnitude;
         return force;
-    }
-
-
-
-
-
-    private void HandleMapNavigation()
-    {
-        if (mapOpen)
-        {
-            navMapVisual.SetActive(true);
-            float angle = transform.eulerAngles.z - 90; // Get the z-axis rotation of the ship
-            rotationalNavArrow.SetDirectionRotation(angle);
-        }
-        else
-        {
-            navMapVisual.SetActive(false);
-        }
-    }
-
-    private void CheckForMapInput()
-    {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            if (mapOpen)
-            {
-                Debug.Log("Closing map_Preface");
-                mapOpen = false;
-                mapCameraZoom.LeaveMap();
-            }
-            else
-            {
-                Debug.Log("Opening map_Preface");
-                mapCameraZoom.OpenMap();
-                mapOpen = true;
-            }
-        }
     }
 
 

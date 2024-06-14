@@ -12,6 +12,7 @@ public class ShipInputHandler : MonoBehaviour
     private ShipMovement shipMovement;
     private ShipEffects shipEffects;
     private ShipCollisionDetection shipCollisionDetection;
+    private CameraManager cameraManager;
 
     
 
@@ -21,6 +22,7 @@ public class ShipInputHandler : MonoBehaviour
         shipMovement = GetComponent<ShipMovement>();
         shipEffects = GetComponent<ShipEffects>();  
         shipCollisionDetection = GetComponent<ShipCollisionDetection>();
+        cameraManager = FindObjectOfType<CameraManager>();
     }
 
 
@@ -28,6 +30,8 @@ public class ShipInputHandler : MonoBehaviour
     void Update()
     {
         ControlShip();
+        HandleMapInput();
+
     }
     private void ControlShip()
     {
@@ -60,6 +64,14 @@ public class ShipInputHandler : MonoBehaviour
         {
             shipEffects.StopThrustEffect();
             shipEffects.StopBoostEffect();
+        }
+    }
+
+    private void HandleMapInput()
+    {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            cameraManager.ToggleMap();
         }
     }
 }
