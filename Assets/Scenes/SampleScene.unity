@@ -3162,6 +3162,10 @@ GameObject:
   - component: {fileID: 1001012852}
   - component: {fileID: 1001012856}
   - component: {fileID: 1001012857}
+  - component: {fileID: 1001012861}
+  - component: {fileID: 1001012860}
+  - component: {fileID: 1001012859}
+  - component: {fileID: 1001012858}
   m_Layer: 0
   m_Name: Ship
   m_TagString: Untagged
@@ -3209,30 +3213,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   G: 1
-  thrust: 50
-  rotationSpeed: 300
-  boostBonus: 80
-  jetEffect: {fileID: 1095570544}
-  landingEffect: {fileID: 323711713}
-  blueThrust: {fileID: 2125259597}
-  blueThruster: 0
   rotationalNavArrow: {fileID: 2095033596}
   velocityNavArrow: {fileID: 1063538647}
   navMapVisual: {fileID: 252985329}
   pathRenderer: {fileID: 1826699208}
-  pathLength: 2000
+  pathLength: 300
   pathPointInterval: 0.1
   mapCameraZoom: {fileID: 344915345}
   orbitRadius: 100
   orbitRenderer: {fileID: 1405800598}
-  numPathPoints: 500
-  pathTimeTotal: 5
-  flightPath: {fileID: 1826699206}
+  numPathPoints: 300
+  flightPath: {fileID: 0}
   startingPoint: 0
   colliderPrefab: {fileID: 458297115}
-  numberOfColliders: 400
+  numberOfColliders: 20
   gravityDebugMultiplier: 1
-  flightPathSpeed: 5
+  flightPathSpeed: 1
 --- !u!212 &1001012854
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3410,6 +3406,57 @@ MonoBehaviour:
   velocityText: {fileID: 800074752}
   angularVelocityText: {fileID: 1365921019}
   gravitationalForceText: {fileID: 80529838}
+--- !u!114 &1001012858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001012851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 386816bf76122b544b5da23cc0142eab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotationSpeed: 100
+  thrust: 30
+  boostBonus: 20
+--- !u!114 &1001012859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001012851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46752e7bdaf98d440ac3be21c24acfd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1001012860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001012851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12dbcfe015095cc4fa7ac80ffa649dee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1001012861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001012851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1f7672a6b7fc554d966f945b190fd84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1003274541
 GameObject:
   m_ObjectHideFlags: 0
@@ -5246,6 +5293,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1758139228}
   m_CullTransparentMesh: 1
+--- !u!1 &1814593911
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1814593913}
+  - component: {fileID: 1814593912}
+  m_Layer: 0
+  m_Name: CameraManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1814593912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1814593911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1222ef175fe8a4444a25236a4d9b363f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1814593913
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1814593911}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1817946617
 GameObject:
   m_ObjectHideFlags: 0
@@ -5891,7 +5982,7 @@ GameObject:
   - component: {fileID: 2125259599}
   - component: {fileID: 2125259598}
   m_Layer: 0
-  m_Name: blueThrust
+  m_Name: BoostEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6062,3 +6153,4 @@ SceneRoots:
   - {fileID: 6434006831971850097}
   - {fileID: 1076139697}
   - {fileID: 1539010622}
+  - {fileID: 1814593913}

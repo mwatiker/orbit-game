@@ -26,6 +26,8 @@ public class CinemachineCameraZoom : MonoBehaviour
 
     public bool isShipCamera = false;
 
+    private GameObject shipNav;
+
 
     
 
@@ -35,6 +37,7 @@ public class CinemachineCameraZoom : MonoBehaviour
         originalOrthoSize = cinemachineCamera.m_Lens.OrthographicSize;
         originalPosition = cinemachineCamera.transform.position;
         screenBounds = new Vector2(Screen.width, Screen.height);
+        shipNav = GameObject.Find("shipNav");
     }
 
     void Update()
@@ -111,13 +114,15 @@ public class CinemachineCameraZoom : MonoBehaviour
 
     public void OpenMap()
     {
-        cinemachineCamera.Priority = 30;
+        cinemachineCamera.Priority = 30;        
+        shipNav.SetActive(true);
     }
 
     public void LeaveMap()
     {
         cinemachineCamera.Priority = 10;
         StartCoroutine(SafelyRepositionMap());
+        shipNav.SetActive(false);
 
     }
 

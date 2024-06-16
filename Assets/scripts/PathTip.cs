@@ -14,7 +14,7 @@ public class PathTip : MonoBehaviour
     {
         if (collision.gameObject.tag == "Planet")
         {
-            ship.HaltPathProjection(colliderIndex);
+            //ship.HaltPathProjection(colliderIndex);
         }
     }
 
@@ -22,7 +22,7 @@ public class PathTip : MonoBehaviour
     {
         if (collision.gameObject.tag == "Planet")
         {
-            ship.AllowPathProjection(colliderIndex);
+            //ship.AllowPathProjection(colliderIndex);
         }
     }
 
