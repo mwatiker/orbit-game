@@ -4,8 +4,11 @@ Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
         _Opacity ("Opacity", Range(0,1)) = 1.0
-        _AuroraIterations ("Aurora Iterations", Range(1, 50)) = 50
+        _AuroraSize ("Aurora Size", Range(1, 50)) = 50
         _StarIterations ("Star Iterations", Range(1, 10)) = 4
+        _Background ("Background", Range(0, 1)) = 0
+        _GlowIntensity ("Glow Intensity", Range(0, 10)) = 0.5
+
     }
     SubShader
     {
@@ -27,8 +30,10 @@ Properties
 
             sampler2D _MainTex;
             float _Opacity;
-            int _AuroraIterations;
-            int _StarIterations;
+            float _AuroraSize;
+            float _StarIterations;
+            float _Background;
+            float _GlowIntensity;
 
             float tri(in float x) {
                 return clamp(abs(frac(x) - .5), 0.01, 0.49);
@@ -72,16 +77,16 @@ Properties
                 fixed4 col = fixed4(0, 0, 0, 0);
                 fixed4 avgCol = fixed4(0, 0, 0, 0);
 
-                for (int i = 0; i < _AuroraIterations; i++)
+                for (int i = 0; i < _AuroraSize; i++)
                 {
                     float of = 0.006 * hash21(_ScreenParams.xy) * smoothstep(0., 15., i);
                     float pt = ((.8 + pow(i, 1.4)*.002) - ro.y) / (rd.y*2. + 0.4);
                     pt -= of;
                     fixed3 bpos = ro + pt * rd;
                     fixed2 p = bpos.zx;
-                    float rzt = triNoise2d(p, 0.06);
+                    float rzt = triNoise2d(p, 0.06) * _GlowIntensity;
                     fixed4 col2 = fixed4(0, 0, 0, rzt);
-                    col2.rgb = (sin(1. - fixed3(2.15, -.5, 1.2) + i * 0.043) * 0.5 + 0.5) * rzt;
+                    col2.rgb = (sin(1. - fixed3(2.15, -.5, 1.2) + i * 0.043) * 0.5 + 0.5) * rzt; // Modified line
                     avgCol = lerp(avgCol, col2, .5);
 
                     col += avgCol*exp2(-i*0.065 - 2.5)*smoothstep(0., 5., i);
@@ -90,6 +95,7 @@ Properties
                 col *= (clamp(rd.y*15. + .4, 0., 1.));
                 return col*1.8;
             }
+
 
             fixed3 stars(in fixed3 p)
             {
@@ -116,7 +122,7 @@ Properties
                 float sd = dot(normalize(fixed3(-0.5, -0.6, 0.9)), rd)*0.5 + 0.5;
                 sd = pow(sd, 5.);
                 fixed3 col = lerp(fixed3(0.05, 0.1, 0.2), fixed3(0.1, 0.05, 0.2), sd);
-                return col*.63;
+                return col*.63 * _Background;
             }
 
             fixed4 frag(v2f_img i) : SV_Target
@@ -130,7 +136,9 @@ Properties
 
                 fixed3 col = bg(rd);
 
-				fixed4 aur = aurora(ro, rd);
+                if (rd.y < 0.)
+                {
+                    fixed4 aur = aurora(ro, rd);
 				col += stars(rd);
 				col = col*(1. - aur.a) + aur.rgb;
 				rd.y = abs(rd.y);
@@ -138,6 +146,9 @@ Properties
                     fixed4 aura = aurora(ro, rd);
                     col += stars(rd)*0.1;
                     col = col*(1. - aura.a) + aura.rgb;
+                }
+
+				
 
                 // if (rd.y > 0.) {
                 //     fixed4 aur = aurora(ro, rd);

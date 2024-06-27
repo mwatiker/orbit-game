@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Maybe2
-  m_Shader: {fileID: 4800000, guid: 59fe13c11359ff54daea8ed63baf101e, type: 3}
+  m_Shader: {fileID: 4800000, guid: 7dc220c981c3c214eb03cad24f65d557, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -96,7 +96,7 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _AlphaToMask: 0
-    - _AuroraIterations: 10.1
+    - _AuroraIterations: 22.6
     - _AuroraSpeed: 0.025
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
@@ -115,7 +115,7 @@ Material:
     - _GlossyReflections: 0
     - _Metallic: 0
     - _OcclusionStrength: 1
-    - _Opacity: 0.049
+    - _Opacity: 0.014
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
